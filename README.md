@@ -1,9 +1,7 @@
----
-title: "Shell scripting with Haskell"
-author: Franz Thoma
-date: 2017-02-24
-location: Berlin
----
+Shell scripting with Haskell
+============================
+
+Slides: [Shell scripting with Haskell.pdf](Shell scripting with Haskell.pdf)
 
 
 Shell scripting with high-level languages
@@ -11,12 +9,9 @@ Shell scripting with high-level languages
 
 ## Why use a high-level language for scripting
 
-<div class="notes">
-
 A simple script is easily written in your favourite shell's language. As scripts
 tend to grow larger, eventually becoming small command line applications,
 advantages of higher-level languages pay off compared to bare shell scripts.
-</div>
 
 * **Abstraction**: Support for data structures, types and encapsulation helps
 allow cleaner semantics.
@@ -51,24 +46,15 @@ The `turtle` library
 * The idea is to provide a set of recognizeable functions for accessing the file
 system, streaming data, and job control.
 
-<div class="notes">
-
 Its purpose is mainly educational, but it is surprisingly handy when it comes to
 writing small shell-like scripts.
-</div>
-
 
 ## Demo
-
-<div class="notes">
 
 Start a `ghci` session in the project directory and try some Shell commands.
 The `.ghci` file makes sure that the relevant modules are imported.
 The `-XOverloadedStrings` language extension is enabled to make use of `Text`
 and `FilePath` easier.
-</div>
-
-. . .
 
 ```haskell
 :set -XOverloadedStrings
@@ -77,7 +63,6 @@ import qualified Data.Text as Text
 import qualified Filesystem.Path.CurrentOS as Path
 ```
 
-. . .
 
 ```haskell
 projectDir <- pwd
@@ -103,10 +88,7 @@ Turtle exposes some default shell commands:
 * `rm   :: FilePath -> IO ()`
 * `pwd  :: IO FilePath`
 
-<div class="notes">
-
 For a complete reference see the [turtle manual](https://hackage.haskell.org/package/turtle-1.2.8/docs/Turtle-Prelude.html).
-</div>
 
 ## Building your own commands
 
@@ -118,7 +100,6 @@ proc :: Text        -- Command
      -> Shell Text  -- Lines of standard input
      -> IO ExitCode
 ```
-. . .
 
 Example:
 
@@ -139,13 +120,10 @@ less txt = proc "less" [] txt
 
 ## The `Shell` type
 
-<div class="notes">
-
 The above commands all had side-effects, but did not have any standard
 input/output. Besides browsing and manipulating the file system, the main use of
 shell scripting is to stream and manipulate lines of text using pipes.
 In `turtle` this is the realm of the `Shell` type.
-</div>
 
 `Shell a` is a stream of items of type `a`, with the possibility to execute `IO`
 actions.
@@ -169,8 +147,6 @@ less' = less . input
 -- »cat <file> | less«
 ```
 
-. . .
-
 The bind operator `(>>=)` is the equivalent to `xargs`:
 
 ```haskell
@@ -179,11 +155,8 @@ dircat dir = ls dir >>= input
 -- »ls <dir> | xargs cat«
 ```
 
-<div class="notes">
-
 A small demo can be found in
 [`shell/print-all-files.hs`](shell/print-all-files.hs).
-</div>
 
 
 Scripts & Dependency Management
@@ -221,14 +194,10 @@ import Turtle
 main = echo "Hello, World"
 ```
 
-<div class="notes">
-
 All examples in this repo use the Stack script interpreter.
 
 Upcoming versions of `stack` will feature a `stack script` command that will
 even improve on encapsulation and reproducibility of standalone scripts.
-</div>
-
 
 
 Parsing command line options
@@ -236,11 +205,8 @@ Parsing command line options
 
 ## Auto-generated CLIs
 
-<div class="notes">
-
 Even the most trivial command line applications should have a `--help` option
 providing a short description of the application and its usage:
-</div>
 
 ```
 > my-application --help
@@ -251,8 +217,6 @@ Usage: my-application
 Available options:
   -h,--help                Show this help text
 ```
-
-. . .
 
 Turtle can generate this CLI for us:
 
@@ -303,8 +267,6 @@ Sometimes only one or two simple parameters need to be passed. The
 [`optparse-generic`](https://hackage.haskell.org/package/optparse-generic-1.1.0)
 library requires even less boilerplate to generate a CLI.
 
-. . .
-
 ```haskell
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 
@@ -320,8 +282,6 @@ main = do
     print command
 ```
 
-. . .
-
 ```
 > ./my-application-positional --help
 My Application
@@ -331,8 +291,6 @@ Usage: my-application-positional TEXT INT [TEXT]
 Available options:
   -h,--help                Show this help text
 ```
-
-<div class="notes">
 
 `optparse-generic` uses GHC's Generics feature to auto-generate the help text
 and even the command line argument parser. All you need is to enable the
@@ -354,7 +312,6 @@ used for the command names. Of course each constructor can again take parameters
 (positional arguments), or have record fields (named options).
 
 Subcommands have their own `--help` option that prints a usage summary.
-</div>
 
 ## `bash` auto-completion
 
@@ -363,8 +320,6 @@ Subcommands have their own `--help` option that prints a usage summary.
 ```
 source <( my-application --bash-completion-script $(which my-application) )
 ```
-
-<div class="notes">
 
 `zsh` is not supported (your chance to contribute!), but luckily `bash`
 auto-completion compatibility can be enabled:
@@ -383,7 +338,6 @@ directory:
 my-application --bash-completion-script $(which my-application) \
     > /etc/bash_completion.d/my-application
 ```
-</div>
 
 
 A small application
@@ -393,11 +347,8 @@ A small application
 
 [`brick/select-file.hs`](brick/select-file.hs)
 
-<div class="notes">
-
 [select-file](brick/select-file.hs) is a small demo program that lists files in
 a directory in a menu and prints the selected file to stdout.
-</div>
 
 
 Conclusion
@@ -411,7 +362,3 @@ Haskell has a rich ecosystem for scripting and small CLI applications:
 * `optparse-applicative` for declarative command line option parsing
 * `brick` (and `vty`) as a lightweight `ncurses` textual interface
 * `stack` with `stack runhaskell` for ad-hoc dependency management
-
-## Thank you
-
-Questions?
