@@ -1,5 +1,5 @@
 #!/usr/bin/env stack
--- stack runhaskell --resolver=lts-7.19 --package=optparse-generic
+-- stack runhaskell --resolver=lts-8.0 --package=optparse-generic
 
 {-# LANGUAGE DataKinds, DeriveGeneric, OverloadedStrings, TypeOperators #-}
 
