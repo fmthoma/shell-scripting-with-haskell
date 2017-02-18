@@ -16,7 +16,7 @@ optionsParser :: Parser Options
 optionsParser = liftA3 Options
     (switch "foo" 'f' "To foo or not to foo")
     (optional (optText "bar" 'b' "A bar option"))
-    (argText "BAZ" "Some baz input")
+    (argText "BAZ" "Some baz args")
 
 main :: IO ()
 main = do

@@ -51,10 +51,11 @@ writing small shell-like scripts.
 
 ## Demo
 
-Start a `ghci` session in the project directory and try some Shell commands.
-The `.ghci` file makes sure that the relevant modules are imported.
-The `-XOverloadedStrings` language extension is enabled to make use of `Text`
-and `FilePath` easier.
+Start a `ghci` session (`stack ghci`) in the project directory and try some
+Shell commands. Stack makes sure that the dependencies are built (might take a
+while the first time), the `.ghci` file makes sure that the relevant modules are
+imported. The `-XOverloadedStrings` language extension is enabled to make use of
+`Text` and `FilePath` easier.
 
 ```haskell
 :set -XOverloadedStrings
@@ -72,16 +73,16 @@ pwd
 cd projectDir
 pwd
 view (ls ".")
-let less file = proc "less" [file] empty
-less "README.md"
-less ".ghci"
+let vi file = proc "vi" [file] empty
+vi "README.md"
+vi ".ghci"
 ```
 
 ## Shell commands and their types
 
 Turtle exposes some default shell commands:
 
-* `echo :: Text -> IO ()`
+* `echo :: Line -> IO ()`
 * `cd   :: FilePath -> IO ()`
 * `mv   :: FilePath -> FilePath -> IO ()`
 * `cp   :: FilePath -> FilePath -> IO ()`
@@ -97,7 +98,7 @@ The `proc` function allows calling external commands:
 ```haskell
 proc :: Text        -- Command
      -> [Text]      -- Arguments
-     -> Shell Text  -- Lines of standard input
+     -> Shell Line  -- Lines of standard input
      -> IO ExitCode
 ```
 
@@ -105,8 +106,7 @@ Example:
 
 ```haskell
 vi :: FilePath -> IO ExitCode
-vi file = proc "vi" [filename] empty
-    where filename = Text.pack (Path.encodeString file)
+vi file = proc "vi" [format fp file] empty
 ```
 
 ## Shell streams
@@ -114,7 +114,7 @@ vi file = proc "vi" [filename] empty
 What about piping standard output to `less`?
 
 ```haskell
-less :: Shell Text -> IO ExitCode
+less :: Shell Line -> IO ExitCode
 less txt = proc "less" [] txt
 ```
 
@@ -128,9 +128,9 @@ In `turtle` this is the realm of the `Shell` type.
 `Shell a` is a stream of items of type `a`, with the possibility to execute `IO`
 actions.
 
-* `stdin  :: Shell Text`
-* `input  :: FilePath -> Shell Text`
-* `yes    :: Shell Text`
+* `stdin  :: Shell Line`
+* `input  :: FilePath -> Shell Line`
+* `yes    :: Shell Line`
 * `select :: [a] -> Shell a`
 * `ls     :: FilePath -> Shell FilePath`
 * `cat    :: [Shell a] -> Shell a`
@@ -142,7 +142,7 @@ Function application/composition can be used to compose shell actions: `(.)` and
 `($)` act like unix pipes (but backwards):
 
 ```haskell
-less' :: FilePath -> IO ()
+less' :: FilePath -> IO ExitCode
 less' = less . input
 -- »cat <file> | less«
 ```
@@ -150,7 +150,7 @@ less' = less . input
 The bind operator `(>>=)` is the equivalent to `xargs`:
 
 ```haskell
-dircat :: FilePath -> Shell Text
+dircat :: FilePath -> Shell Line
 dircat dir = ls dir >>= input
 -- »ls <dir> | xargs cat«
 ```
@@ -209,10 +209,10 @@ Even the most trivial command line applications should have a `--help` option
 providing a short description of the application and its usage:
 
 ```
-> my-application --help
+> optparse/my-application.hs --help
 My Application
 
-Usage: my-application
+Usage: my-application.hs
 
 Available options:
   -h,--help                Show this help text
@@ -253,10 +253,10 @@ optionsParser = liftA3 Options
 ([Source](optparse/my-application-turtle.hs))
 
 ```
-> ./my-application-turtle --help
+> optparse/my-application-turtle.hs --help
 Parse some options
 
-Usage: my-application-turtle [-f|--foo] [-b|--bar BAR] BAZ
+Usage: my-application-turtle.hs [-f|--foo] [-b|--bar BAR] BAZ
 
 Available options:
   -h,--help                Show this help text
@@ -289,10 +289,10 @@ main = do
 ([Source](optparse/my-application-positional.hs))
 
 ```
-> ./my-application-positional --help
+> optparse/my-application-positional.hs --help
 My Application
 
-Usage: my-application-positional TEXT INT [TEXT]
+Usage: my-application-positional.hs TEXT INT [TEXT]
 
 Available options:
   -h,--help                Show this help text

@@ -1,5 +1,5 @@
 #!/usr/bin/env stack
--- stack runhaskell --resolver=lts-5.0 --package=turtle --package=brick
+-- stack runhaskell --resolver=lts-8.0 --package=turtle --package=brick
 
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -30,41 +30,41 @@ main = do
         Just file -> echo file
         Nothing   -> exitFailure
 
-listFiles :: FilePath -> Shell Text
-listFiles dir = fmap (pack . encodeString) (ls dir)
+listFiles :: FilePath -> Shell Line
+listFiles dir = fmap (unsafeTextToLine . format fp . filename) (ls dir)
 
 exitFailure :: IO ()
 exitFailure = exit (ExitFailure 1)
 
 ---------------------------------------------------------------------------
 
-dmenu :: Shell Text -> IO (Maybe Text)
+dmenu :: Shell Line -> IO (Maybe Line)
 dmenu items =
     let dmenuOut = inproc "dmenu" [] items
     in  fold dmenuOut Fold.head
 
 ---------------------------------------------------------------------------
 
-brickmenu :: Shell Text -> IO (Maybe Text)
+brickmenu :: Shell Line -> IO (Maybe Line)
 brickmenu items = do
     itemsVector <- foldIO items Fold.vector
-    finalList <- defaultMain app (list (Name "list") itemsVector 1)
+    finalList <- defaultMain app (list () itemsVector 1)
     pure (finalList ^. listSelectedL >>= \index -> itemsVector !? index)
 
-app :: App (List Text) Event
+app :: App (List () Line) () ()
 app = App
-    { appDraw = \list -> [renderList list (const txt)]
+    { appDraw = pure . renderList (const (txt . lineToText)) True
 
     , appChooseCursor = showFirstCursor
 
     , appHandleEvent = \list event -> case event of
-        EvKey KEnter [] -> halt list
-        _               -> handleEvent event list >>= continue
+        VtyEvent (EvKey KEnter []) -> halt list
+        VtyEvent ev                -> handleListEvent ev list >>= continue
+        _                          -> continue list
 
     , appStartEvent = pure
 
     , appAttrMap = const $ attrMap defAttr
         [ (listAttr,         fg white)
         , (listSelectedAttr, black `on` white) ]
-
-    , appLiftVtyEvent = id }
+    }
