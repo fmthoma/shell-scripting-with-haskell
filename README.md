@@ -230,6 +230,8 @@ main = do
     print command
 ```
 
+([Source](optparse/my-application.hs))
+
 ## Parameters and options
 
 `turtle` provides an API for parsing parameters and options:
@@ -247,6 +249,8 @@ optionsParser = liftA3 Options
     (optional (optText "bar" 'b' "A bar option"))
     (argText "BAZ" "Some baz args")
 ```
+
+([Source](optparse/my-application-turtle.hs))
 
 ```
 > ./my-application-turtle --help
@@ -281,6 +285,8 @@ main = do
     command <- getRecord "My Application" :: IO Positional
     print command
 ```
+
+([Source](optparse/my-application-positional.hs))
 
 ```
 > ./my-application-positional --help
