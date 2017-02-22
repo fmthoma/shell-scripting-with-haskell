@@ -1,0 +1,4 @@
+:set -XOverloadedStrings
+import Turtle
+import qualified Data.Text as Text
+import qualified Filesystem.Path.CurrentOS as Path
