@@ -147,16 +147,20 @@ less' = less . input
 -- »cat <file> | less«
 ```
 
-The bind operator `(>>=)` is the equivalent to `xargs`:
+The bind operator `(>>=)` is the equivalent to shell expansions and `xargs`:
 
 ```haskell
 dircat :: FilePath -> Shell Line
 dircat dir = ls dir >>= input
--- »ls <dir> | xargs cat«
+-- »cat $(ls <dir>)«
+-- or »ls <dir> | xargs cat«
 ```
+
+<div class="notes">
 
 A small demo can be found in
 [`shell/print-all-files.hs`](shell/print-all-files.hs).
+</div>
 
 
 Scripts & Dependency Management
@@ -166,7 +170,7 @@ Scripts & Dependency Management
 
 GHC has a script interpreter that can be used in a shebang line:
 
-```
+```haskell
 #!/usr/bin/env runhaskell
 
 {-# LANGUAGE OverloadedStrings #-}
@@ -183,7 +187,7 @@ environment.
 
 Stack has a remedy for the dependency problem:
 
-```
+```haskell
 #!/usr/bin/env stack
 -- stack runhaskell --resolver=lts-8.0 --package=turtle
 
